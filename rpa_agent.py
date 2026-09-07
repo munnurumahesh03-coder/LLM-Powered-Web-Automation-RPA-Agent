@@ -16,8 +16,8 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=chrome_options)
 
-# 2. Scrape the REAL Website (Asian Heart Institute - Mumbai)
-real_url = "https://www.asianheartinstitute.org/cardiologist-in-mumbai/"
+# 2. Scrape the REAL Website (Wikipedia - Indian Cardiologists)
+real_url = "https://en.wikipedia.org/wiki/Category:Indian_cardiologists"
 print(f"🌐 Navigating to {real_url}..." )
 driver.get(real_url)
 time.sleep(3)
@@ -27,12 +27,12 @@ raw_text = driver.find_element(By.TAG_NAME, "body").text[:5000]
 driver.quit()
 print("✅ Real Data Scraped!")
 
-# 3. Process with LLM (Extracting Real Mumbai Cardiologists)
+# 3. Process with LLM (Extracting Real Indian Cardiologists)
 client = Groq(api_key=os.environ["GROQ_API_KEY"])
 prompt = f"""
-Extract the cardiologists mentioned in this text. 
+Extract the doctors mentioned in this text. 
 Format as a strict JSON array with keys: 'name', 'specialty', 'location'.
-CRITICAL RULE: Set the 'location' to 'Mumbai' for all of them, since this is a Mumbai hospital.
+CRITICAL RULE: Set the 'specialty' to 'Cardiology' and 'location' to 'India' for all of them.
 RAW TEXT:
 {raw_text}
 OUTPUT ONLY VALID JSON.
@@ -53,11 +53,11 @@ mongo_client = MongoClient(os.environ["MONGO_URI"])
 db = mongo_client["hextgen_medtech"]
 
 # Put them in a clean, professional folder
-collection = db["mumbai_cardiologists"] 
+collection = db["indian_cardiologists"] 
 
 collection.delete_many({}) # Clears old data so you only have the fresh, real list
 if len(json_data) > 0:
     collection.insert_many(json_data)
-    print(f"✅ SUCCESS! {len(json_data)} real Mumbai cardiologists pushed to MongoDB Atlas!")
+    print(f"✅ SUCCESS! {len(json_data)} real Indian cardiologists pushed to MongoDB Atlas!")
 else:
     print("⚠️ No matching doctors found to insert.")
