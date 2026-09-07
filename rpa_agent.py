@@ -16,17 +16,26 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=chrome_options)
 
-# 2. Scrape the Website
-mock_url = "data:text/html,<html><body><h1>HextGen MedTech - Public Provider Directory</h1><div class='provider'><p>Dr. Sarah Jenkins - Cardiology</p><p>Contact: 555-0198</p><p>Available: Mon-Wed</p></div><div class='provider'><p>Dr. Marcus Chen, Neurology</p><p>Phone: (555) 847-3321</p><p>Notes: Not accepting new patients.</p></div><div class='provider'><p>Pediatrics: Dr. Emily Ross</p><p>Call 555-0024 for appointments.</p></div></body></html>"
-driver.get(mock_url)
-time.sleep(2)
-raw_text = driver.find_element(By.TAG_NAME, "body").text
+# 2. Scrape the REAL Website (Wikipedia - Nobel Prize in Medicine)
+real_url = "https://en.wikipedia.org/wiki/List_of_Nobel_laureates_in_Physiology_or_Medicine"
+print(f"🌐 Navigating to {real_url}..." )
+driver.get(real_url)
+time.sleep(3)
+
+# Grab the text, but limit to 5000 characters so we don't overload the LLM
+raw_text = driver.find_element(By.TAG_NAME, "body").text[:5000]
 driver.quit()
-print("✅ Data Scraped!")
+print("✅ Real Data Scraped!")
 
 # 3. Process with LLM
 client = Groq(api_key=os.environ["GROQ_API_KEY"])
-prompt = f"Extract doctors info as strict JSON array with keys: name, specialty, phone, notes. RAW TEXT:\n{raw_text}\nOUTPUT ONLY VALID JSON."
+prompt = f"""
+Extract the Nobel laureates in Medicine mentioned in this text. 
+Format as a strict JSON array with keys: 'year', 'name', 'rationale'.
+RAW TEXT:
+{raw_text}
+OUTPUT ONLY VALID JSON.
+"""
 response = client.chat.completions.create(
     model="openai/gpt-oss-120b",
     messages=[{"role": "user", "content": prompt}],
@@ -42,6 +51,7 @@ print("✅ Data Cleaned by AI!")
 mongo_client = MongoClient(os.environ["MONGO_URI"])
 db = mongo_client["hextgen_medtech"]
 collection = db["providers"]
-collection.delete_many({}) # Clear old data for the daily refresh
+
+# Notice: I removed the delete_many() line! Now your database will grow!
 collection.insert_many(json_data)
-print(f"✅ SUCCESS! {len(json_data)} records pushed to MongoDB Atlas!")
+print(f"✅ SUCCESS! {len(json_data)} real records pushed to MongoDB Atlas!")
