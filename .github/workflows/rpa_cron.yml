@@ -1,0 +1,30 @@
+name: Daily RPA Automation
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs automatically every day at Midnight UTC
+  workflow_dispatch: # Gives you a manual "Run" button to test it anytime!
+
+jobs:
+  run-rpa-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run RPA Agent
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+      run: |
+        python rpa_agent.py
