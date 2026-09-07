@@ -32,6 +32,7 @@ client = Groq(api_key=os.environ["GROQ_API_KEY"])
 prompt = f"""
 Extract the Nobel laureates in Medicine mentioned in this text. 
 Format as a strict JSON array with keys: 'year', 'name', 'rationale'.
+CRITICAL RULE: Summarize the 'rationale' into exactly 2 clear sentences. Do not make it longer.
 RAW TEXT:
 {raw_text}
 OUTPUT ONLY VALID JSON.
