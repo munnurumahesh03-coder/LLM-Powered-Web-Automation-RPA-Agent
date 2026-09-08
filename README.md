@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg )](https://www.python.org/ )
 [![Selenium](https://img.shields.io/badge/Selenium-Web_Automation-43B02A.svg )](https://www.selenium.dev/ )
 [![MongoDB](https://img.shields.io/badge/MongoDB_Atlas-Cloud_Database-47A248.svg )](https://www.mongodb.com/ )
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED.svg )](https://www.docker.com/ )
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI%2FCD_Cron-2088FF.svg )](https://github.com/features/actions )
 
 ## 📌 Overview
@@ -23,10 +24,21 @@ The entire pipeline is deployed as a serverless **Cron Job via GitHub Actions**,
 | **Web Automation** | Selenium | Capable of rendering JavaScript-heavy pages and bypassing basic anti-bot protections that block standard `requests` libraries. |
 | **Data Structuring** | Groq (Llama-3) | Replaces brittle RegEx and XPath rules. The LLM understands context, allowing it to extract data even if the website's HTML structure completely changes. |
 | **Database** | MongoDB Atlas | NoSQL document structure is perfectly suited for ingesting dynamic JSON outputs from LLMs. |
-| **Deployment** | GitHub Actions | Serverless execution eliminates the need to pay for 24/7 cloud hosting (like AWS EC2) for a script that only needs to run periodically. |
+| **Deployment** | Docker & GitHub Actions | Containerizing the scraper ensures it runs flawlessly on any cloud server, while GitHub Actions provides free, serverless Cron scheduling. |
 
-## 💻 Local Execution
-If you wish to run this automation script locally:
+## 🐳 Run Locally via Docker (Recommended)
+The automation pipeline is fully containerized. You can pull and run the image directly from the GitHub Container Registry. You must pass your API keys as environment variables (`-e`) for the script to authenticate.
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/munnurumahesh03-coder/llm-powered-web-automation-rpa-agent:latest
+
+# Run the container (Injecting your secret keys)
+docker run -e GROQ_API_KEY="your_groq_key" -e MONGO_URI="your_mongodb_connection_string" ghcr.io/munnurumahesh03-coder/llm-powered-web-automation-rpa-agent:latest
+```
+
+## 💻 Manual Local Execution
+If you wish to run the Python script directly on your machine:
 
 ```bash
 # 1. Clone the repository
@@ -42,3 +54,4 @@ export MONGO_URI="your_mongodb_connection_string"
 
 # 4. Run the Agent
 python rpa_agent.py
+```
